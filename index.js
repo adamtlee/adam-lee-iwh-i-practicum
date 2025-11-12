@@ -38,6 +38,30 @@ app.get('/', async (req, res) => {
     }
 });
 
+app.get('/dogs', async (req, res) => {
+    const dogs = 'https://api.hubspot.com/crm/v3/objects/2-176126733';
+    const headers = {
+        Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
+        'Content-Type': 'application/json'
+    }
+    try {
+        // Request specific properties: name, breed, and age
+        // documentation: https://developers.hubspot.com/docs/api-reference/crm-custom-objects-v3/guide#retrieve-custom-object-records
+        const resp = await axios.get(dogs, { 
+            headers,
+            params: {
+                properties: 'name,breed,age'
+            }
+        });
+        const data = resp.data.results || [];
+        res.render('dogs', { title: 'Dogs | HubSpot APIs', data });
+        
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // TODO: ROUTE 2 - Create a new app.get route for the form to create or update new custom object data. Send this data along in the next route.
 
 // * Code for Route 2 goes here
