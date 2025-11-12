@@ -101,6 +101,34 @@ app.post('/update-cobj', async (req, res) => {
     }
 });
 
+app.post('/update-dogs', async (req, res) => {
+    const newDog = {
+        properties: {
+            "name": req.body.name,
+            "breed": req.body.breed,
+            "age": req.body.age
+        }
+    }
+
+    const createDog = 'https://api.hubspot.com/crm/v3/objects/2-176126733';
+    const headers = {
+        Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
+        'Content-Type': 'application/json'
+    };
+
+    try { 
+        const response = await axios.post(createDog, newDog, { headers });
+        console.log('Dog created successfully:', response.data);
+        res.redirect('/dogs');
+    } catch(err) {
+        console.error('Error creating dog:');
+        console.error('Status:', err.response?.status);
+        console.error('Error Data:', err.response?.data);
+        console.error('Full Error:', err.message);
+        res.redirect('/dogs');
+    }
+});
+
 /** 
 * * This is sample code to give you a reference for how you should structure your calls. 
 
