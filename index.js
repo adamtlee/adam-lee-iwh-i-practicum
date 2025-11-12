@@ -32,7 +32,7 @@ app.get('/', async (req, res) => {
     try {
         const resp = await axios.get(contacts, { headers });
         const data = resp.data.results;
-        res.render('index', { title: 'Home | HubSpot APIs', data });      
+        res.render('homepage', { title: 'Home | HubSpot APIs', data });      
     } catch (error) {
         console.error(error);
     }
