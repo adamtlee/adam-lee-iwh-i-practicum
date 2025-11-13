@@ -21,9 +21,40 @@ if (PRIVATE_APP_ACCESS) {
 }
 
 // TODO: ROUTE 1 - Create a new app.get route for the homepage to call your custom object data. Pass this data along to the front-end and create a new pug template in the views folder.
+app.get('/', async (req, res) => {
+    const headers = {
+        Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
+        'Content-Type': 'application/json'
+    }
+    try {
+        // Fetch dogs only
+        const dogsUrl = 'https://api.hubspot.com/crm/v3/objects/2-176126733';
+        
+        // Request specific properties: name, breed, and age
+        // documentation: https://developers.hubspot.com/docs/api-reference/crm-custom-objects-v3/guide#retrieve-custom-object-records
+        const dogsResp = await axios.get(dogsUrl, { 
+            headers,
+            params: {
+                properties: 'name,breed,age'
+            }
+        });
+        
+        const dogs = dogsResp.data.results || [];
+        
+        res.render('homepage', { 
+            title: 'Home | HubSpot APIs', 
+            dogs: dogs
+        }); 
+        
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 
 // * Code for Route 1 goes here
-app.get('/', async (req, res) => {
+app.get('/contacts', async (req, res) => {
     const contacts = 'https://api.hubspot.com/crm/v3/objects/contacts';
     const headers = {
         Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
@@ -38,70 +69,20 @@ app.get('/', async (req, res) => {
     }
 });
 
-app.get('/dogs', async (req, res) => {
-    const dogs = 'https://api.hubspot.com/crm/v3/objects/2-176126733';
-    const headers = {
-        Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
-        'Content-Type': 'application/json'
-    }
-    try {
-        // Request specific properties: name, breed, and age
-        // documentation: https://developers.hubspot.com/docs/api-reference/crm-custom-objects-v3/guide#retrieve-custom-object-records
-        const resp = await axios.get(dogs, { 
-            headers,
-            params: {
-                properties: 'name,breed,age'
-            }
-        });
-        const data = resp.data.results || [];
-        res.render('dogs', { title: 'Dogs | HubSpot APIs', data });
-        
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
 // TODO: ROUTE 2 - Create a new app.get route for the form to create or update new custom object data. Send this data along in the next route.
 
 // * Code for Route 2 goes here
+
 app.get('/update-cobj', async (req, res) => {
     res.render('updates', { title: 'Update Custom Object Form | Integrating With HubSpot I Practicum' });
-});
-
-app.get('/update-dogs', async (req, res) => {
-    res.render('update-dogs', { title: 'Update Custom Object Form | Integrating With HubSpot I Practicum' });
 });
 
 
 // TODO: ROUTE 3 - Create a new app.post route for the custom objects form to create or update your custom object data. Once executed, redirect the user to the homepage.
 
 // * Code for Route 3 goes here
+
 app.post('/update-cobj', async (req, res) => {
-    const newContact = {
-        properties: {
-            "firstname": req.body.firstname,
-            "lastname": req.body.lastname,
-            "email": req.body.email
-        }
-    }
-
-    const createContact = 'https://api.hubspot.com/crm/v3/objects/contacts';
-    const headers = {
-        Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
-        'Content-Type': 'application/json'
-    };
-
-    try { 
-        await axios.post(createContact, newContact, { headers });
-        res.redirect('/');
-    } catch(err) {
-        console.error(err);
-        res.redirect('/');
-    }
-});
-
-app.post('/update-dogs', async (req, res) => {
     const newDog = {
         properties: {
             "name": req.body.name,
@@ -119,13 +100,13 @@ app.post('/update-dogs', async (req, res) => {
     try { 
         const response = await axios.post(createDog, newDog, { headers });
         console.log('Dog created successfully:', response.data);
-        res.redirect('/dogs');
+        res.redirect('/');
     } catch(err) {
         console.error('Error creating dog:');
         console.error('Status:', err.response?.status);
         console.error('Error Data:', err.response?.data);
         console.error('Full Error:', err.message);
-        res.redirect('/dogs');
+        res.redirect('/');
     }
 });
 
